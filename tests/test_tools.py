@@ -1,37 +1,49 @@
 # ============================================================
-# tests/test_rag.py —— RAG 单测（只测纯函数，不依赖 ChromaDB）
+# tests/test_tools.py —— 工具层单测
 # ============================================================
 
-from agent.rag import chunk_text, rewrite_query
+import pytest
+
+from agent.tools import validate_args, query_city_info, get_user_city, get_weather
 
 
-class TestChunkText:
-    def test_empty(self):
-        assert chunk_text("") == []
+class TestValidateArgs:
+    def test_unknown_tool(self):
+        ok, err = validate_args("not_a_tool", {})
+        assert not ok
+        assert "未知工具" in err
 
-    def test_short_paragraph(self):
-        text = "这是一段短文本。"
-        chunks = chunk_text(text, max_len=100)
-        assert chunks == [text]
+    def test_missing_required(self):
+        ok, err = validate_args("get_weather", {})
+        assert not ok
+        assert "city" in err
 
-    def test_long_paragraph_split(self):
-        # 无标点的长文本，会走按句子兜底逻辑
-        text = "a" * 500
-        chunks = chunk_text(text, max_len=100)
-        assert len(chunks) >= 5
-        assert all(len(c) <= 100 for c in chunks)
+    def test_wrong_type(self):
+        ok, err = validate_args("get_weather", {"city": 123})
+        assert not ok
+        assert "类型错误" in err
 
-    def test_multi_paragraph(self):
-        text = "第一段。\n\n第二段。\n\n第三段。"
-        chunks = chunk_text(text, max_len=100)
-        assert len(chunks) == 3
+    def test_ok(self):
+        ok, err = validate_args("get_weather", {"city": "北京"})
+        assert ok
+        assert err == ""
 
 
-class TestRewriteQuery:
-    def test_fallback_on_failure(self, monkeypatch):
-        """LLM 调用失败时应回退原 query，不抛异常。"""
-        def boom(*a, **kw):
-            raise RuntimeError("mock failure")
+class TestTools:
+    def test_query_city_found(self, tmp_db):
+        result = query_city_info("北京")
+        assert "北京市" in result
+        assert "2189" in result
 
-        monkeypatch.setattr("agent.llm_client.get_client", boom)
-        assert rewrite_query("北京天气") == "北京天气"
+    def test_query_city_not_found(self, tmp_db):
+        result = query_city_info("不存在的城市")
+        assert "没有找到" in result
+
+    def test_get_user_city(self, tmp_db):
+        result = get_user_city("1001")
+        assert "张三" in result
+        assert "北京" in result
+
+    def test_weather_invalid_city(self):
+        result = get_weather("火星")
+        assert "不是地球城市" in result
