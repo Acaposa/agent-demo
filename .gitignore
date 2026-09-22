@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# 环境变量
+.env
+
+# 本地数据库
+cities.db
+sessions.db
+
+# 日志
+logs/
+
+# Chroma 持久化
+chroma_db/
+
+# 本地模型（体积大，一般不传）
+models/
+
+# IDE
+.idea/
+.vscode/
+
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# 环境变量
+.env
+
+# 本地数据库
+cities.db
+sessions.db
+
+# 日志
+logs/
+
+# Chroma 持久化
+chroma_db/
+
+# 本地模型（体积大，一般不传）
+models/
+
+# IDE
+.idea/
+.vscode/
+
+
+
+project_analysis.md

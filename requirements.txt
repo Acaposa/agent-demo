@@ -1,0 +1,9 @@
+openai
+fastapi
+uvicorn[standard]
+python-dotenv
+requests
+chromadb
+sentence-transformers
+pytest
+httpx
